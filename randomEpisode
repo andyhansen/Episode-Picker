@@ -1,0 +1,34 @@
+#!/bin/bash
+#The problem is that it will currently loop forever if 
+#all the episodes in a season have been seen
+touch "viewedEpisodes.txt"
+SEEN="0"
+while [ $SEEN == "0" ]
+do
+  #Need this here to reduce the chance of an infinite loop
+  if [ "$1" == "" ]
+  then
+    EPISODE=`ls -d */ | sort -R | tail -n1 | cat`
+  else
+    if [ echo "$1" | grep -q "/$" ]
+    then
+      EPISODE="$1"
+    else
+      EPISODE="$1/"
+    fi
+  fi
+  EPISODE="$EPISODE""`ls "$EPISODE" | sort -R | tail -n1`"
+
+  #Check to make sure the episode hasn't been seen
+  SEEN="1"
+  while read VIEWED           
+  do           
+    if [ "$VIEWED" == "$EPISODE" ]
+    then
+      SEEN="0"
+    fi
+  done < "viewedEpisodes.txt"
+done
+echo "$EPISODE" >> "viewedEpisodes.txt"
+echo "Watching $EPISODE"
+vlc -q "$EPISODE"
